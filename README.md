@@ -1,158 +1,100 @@
 # SHL-AI-Asessment-Recommender
 
-A conversational AI recommendation system that helps recruiters and hiring managers discover appropriate SHL assessments through natural language interaction.
+A conversational AI-powered recommendation system that helps recruiters and hiring teams identify suitable SHL assessments using natural language queries.
 
-Built for the **SHL AI Intern Take-Home Assignment**.
-
----
-
-## Project Overview
-
-Traditional assessment catalogs require users to already know what they are searching for. This project solves that problem by building a conversational AI agent that understands hiring requirements, asks clarifying questions when needed, and recommends relevant SHL assessments from the official SHL product catalog.
-
-The assistant is designed to:
-
-- Understand vague hiring requirements
-- Ask clarifying questions before recommending
-- Recommend relevant SHL assessments
-- Compare assessments when requested
-- Handle changing requirements during conversation
-- Refuse unrelated or unsafe requests
-- Return structured responses in the exact required API schema
-
-This implementation uses the **official SHL assessment catalog dataset provided in the assignment**.
+Built as part of the **SHL AI Intern Take-Home Assignment**.
 
 ---
 
-## Features
+# Project Overview
 
-- Conversational assessment recommendation
-- Semantic search over SHL assessment catalog
-- SHL-only grounded recommendations
-- Clarification for vague user requests
-- Comparison between assessments
-- Refinement support during multi-turn conversations
-- Stateless API design
-- Prompt injection protection
-- Off-topic refusal handling
-- Fast API response architecture
-- Deployment-ready setup
+Hiring teams often struggle to identify the right assessments from large product catalogs. This project solves that by providing a conversational API that understands hiring requirements, asks clarifying questions, and recommends relevant SHL assessments from the official SHL catalog.
+
+The system supports:
+
+- conversational assessment discovery
+- clarifying vague hiring requests
+- recommending SHL assessments
+- assessment comparison
+- multi-turn conversation handling
+- off-topic refusal
+- prompt injection protection
+- exact API schema compliance
+
+The assistant only recommends assessments from SHL's official catalog dataset.
 
 ---
 
-## Tech Stack
+# Features
 
-### Backend Framework
+- SHL-only recommendations
+- conversational recruiter assistant
+- clarification for ambiguous requests
+- assessment comparison support
+- stateless API architecture
+- prompt injection protection
+- off-topic request refusal
+- legal/compliance refusal boundaries
+- semantic SHL catalog matching
+- structured JSON API responses
+- deployment-ready FastAPI service
+
+---
+
+# Tech Stack
+
+## Backend
 - FastAPI
 - Uvicorn
 
-### Programming Language
+## Programming Language
 - Python 3.11+
 
-### LLM
+## LLM
 - Groq API
 - Llama 3.3 70B Versatile
 
-### Embedding Model
-- Sentence Transformers
-- all-MiniLM-L6-v2
-
-### Vector Search
-- FAISS
-
-### Data Handling
-- Requests
+## Data Processing
 - JSON
+- Requests
 - NumPy
 
-### Environment Management
+## Environment
 - python-dotenv
 
-### Deployment
+## Deployment
 - Render
 - GitHub
 
 ---
 
-## System Architecture
+# System Architecture
 
+```text
 User Query
-↓
-FastAPI `/chat`
-↓
-Conversation preprocessing
-↓
+   ↓
+FastAPI /chat endpoint
+   ↓
+Input validation
+   ↓
 Safety checks
-- vague query detection
-- off-topic detection
-- prompt injection detection
-↓
-Semantic retrieval using FAISS
-↓
-Relevant SHL assessments retrieved
-↓
-Context sent to Groq LLM
-↓
-Structured response returned
-
----
-
-## API Endpoints
-
-### 1. Health Check
-
-**GET /health**
-
-Checks service readiness.
-
-Example:
-
-```json
-{
-  "status": "ok"
-}
+   ├── vague query detection
+   ├── prompt injection detection
+   ├── off-topic detection
+   └── legal/compliance refusal
+   ↓
+SHL catalog retrieval
+   ↓
+Context construction
+   ↓
+Groq LLM reasoning
+   ↓
+Structured JSON response
 ```
 
 ---
 
-### 2. Chat Endpoint
-
-**POST /chat**
-
-Accepts full stateless conversation history.
-
-Example Request:
-
-```json
-{
-  "messages": [
-    {
-      "role": "user",
-      "content": "Hiring a mid-level Java developer with stakeholder communication skills"
-    }
-  ]
-}
-```
-
-Example Response:
-
-```json
-{
-  "reply": "Here are relevant SHL assessments for this role.",
-  "recommendations": [
-    {
-      "name": "Java Assessment",
-      "url": "https://www.shl.com/...",
-      "test_type": "K"
-    }
-  ],
-  "end_of_conversation": true
-}
-```
-
----
-
-## Project Structure
+# Project Structure
 
 ```bash
 shl-ai-assessment-recommender/
@@ -161,12 +103,11 @@ shl-ai-assessment-recommender/
 ├── recommender.py
 ├── scraper.py
 ├── embeddings.py
-├── models.py
 ├── prompts.py
+├── models.py
 ├── requirements.txt
 ├── render.yaml
 ├── README.md
-├── .gitignore
 │
 ├── data/
 │   ├── shl_catalog.json
@@ -176,46 +117,47 @@ shl-ai-assessment-recommender/
 
 ---
 
-## File Descriptions
+# File Descriptions
 
-### app.py
+## app.py
 Main FastAPI application.
 
 Responsibilities:
-- Starts API server
-- Exposes `/health` endpoint
-- Exposes `/chat` endpoint
-- Validates incoming requests
-- Returns structured assignment-compliant responses
+- initializes API server
+- exposes `/health` endpoint
+- exposes `/chat` endpoint
+- validates requests
+- returns assignment-compliant responses
 
 ---
 
-### recommender.py
+## recommender.py
 Core recommendation engine.
 
 Responsibilities:
-- Loads vector search index
-- Loads SHL metadata
-- Handles conversation history
-- Detects vague queries
-- Detects off-topic queries
-- Detects prompt injection attempts
-- Retrieves relevant assessments
-- Sends grounded context to Groq LLM
-- Formats recommendations
+- loads SHL assessment metadata
+- processes user conversations
+- detects vague requests
+- detects off-topic queries
+- detects prompt injection attempts
+- detects legal/compliance boundaries
+- retrieves relevant SHL assessments
+- prepares catalog context
+- calls Groq LLM
+- formats recommendations
 
 ---
 
-### scraper.py
-Catalog ingestion module.
+## scraper.py
+SHL catalog ingestion module.
 
 Responsibilities:
-- Downloads official SHL assessment catalog dataset
-- Cleans malformed JSON
-- Extracts assessment metadata
-- Maps dataset into internal project schema
+- downloads official SHL catalog dataset
+- cleans malformed JSON
+- extracts structured assessment metadata
+- saves processed catalog
 
-Generated output:
+Output:
 
 ```bash
 data/shl_catalog.json
@@ -223,34 +165,43 @@ data/shl_catalog.json
 
 ---
 
-### embeddings.py
-Vector search preparation module.
+## embeddings.py
+Data preparation utility.
 
 Responsibilities:
-- Loads assessment catalog
-- Builds searchable documents
-- Generates embeddings
-- Creates FAISS vector index
-- Saves metadata
+- prepares metadata for retrieval
+- structures searchable catalog records
 
-Generated outputs:
+Outputs:
 
 ```bash
-data/shl_index.faiss
 data/metadata.json
+data/shl_index.faiss
 ```
 
 ---
 
-### models.py
-Pydantic data models.
+## prompts.py
+LLM system behavior instructions.
 
 Responsibilities:
-- Request validation
-- Response validation
-- Assignment schema enforcement
+- defines conversational rules
+- restricts hallucination
+- enforces SHL-only recommendations
+- defines refusal behavior
+- controls clarification behavior
 
-Includes:
+---
+
+## models.py
+Pydantic schemas.
+
+Responsibilities:
+- request validation
+- response validation
+- API schema enforcement
+
+Models:
 - Message
 - ChatRequest
 - Recommendation
@@ -258,36 +209,74 @@ Includes:
 
 ---
 
-### prompts.py
-System instruction module.
-
-Responsibilities:
-- Defines LLM behavior
-- Restricts hallucinations
-- Enforces SHL-only recommendations
-- Controls refusal behavior
-- Defines conversational rules
+## requirements.txt
+Python dependency list.
 
 ---
 
-### requirements.txt
-Dependency list for Python environment.
+## render.yaml
+Deployment configuration for Render hosting.
 
 ---
 
-### render.yaml
-Deployment configuration for Render.
+# API Endpoints
 
-Responsibilities:
-- Dependency installation
-- Data preparation
-- Server startup
+## Health Check
+
+### GET `/health`
+
+Checks whether the service is running.
+
+Response:
+
+```json
+{
+  "status": "ok"
+}
+```
 
 ---
 
-## Installation Guide
+## Chat Endpoint
 
-### 1. Clone Repository
+### POST `/chat`
+
+Accepts full stateless conversation history.
+
+Request:
+
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hiring a senior Java backend engineer with Spring and SQL experience"
+    }
+  ]
+}
+```
+
+Response:
+
+```json
+{
+  "reply": "Recommended SHL assessments for this role...",
+  "recommendations": [
+    {
+      "name": "Assessment Name",
+      "url": "https://www.shl.com/...",
+      "test_type": "K"
+    }
+  ],
+  "end_of_conversation": false
+}
+```
+
+---
+
+# Installation
+
+## Clone Repository
 
 ```bash
 git clone YOUR_REPOSITORY_URL
@@ -296,7 +285,7 @@ cd shl-ai-assessment-recommender
 
 ---
 
-### 2. Create Virtual Environment
+## Create Virtual Environment
 
 ```bash
 python -m venv venv
@@ -304,15 +293,15 @@ python -m venv venv
 
 ---
 
-### 3. Activate Virtual Environment
+## Activate Environment
 
-Windows:
+### Windows
 
 ```bash
 venv\Scripts\activate
 ```
 
-Mac/Linux:
+### Linux / Mac
 
 ```bash
 source venv/bin/activate
@@ -320,7 +309,7 @@ source venv/bin/activate
 
 ---
 
-### 4. Install Dependencies
+## Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -328,7 +317,7 @@ pip install -r requirements.txt
 
 ---
 
-## Environment Variables
+# Environment Variables
 
 Create `.env`
 
@@ -339,7 +328,7 @@ MODEL_NAME=llama-3.3-70b-versatile
 
 ---
 
-## Data Preparation
+# Data Preparation
 
 Download SHL catalog:
 
@@ -347,13 +336,7 @@ Download SHL catalog:
 python scraper.py
 ```
 
-Expected:
-
-```bash
-Saved 377 assessments
-```
-
-Generate embeddings:
+Prepare metadata:
 
 ```bash
 python embeddings.py
@@ -361,7 +344,7 @@ python embeddings.py
 
 ---
 
-## Run Locally
+# Run Locally
 
 Start server:
 
@@ -369,7 +352,7 @@ Start server:
 uvicorn app:app --reload
 ```
 
-Swagger docs:
+Swagger documentation:
 
 ```text
 http://127.0.0.1:8000/docs
@@ -383,23 +366,23 @@ http://127.0.0.1:8000/health
 
 ---
 
-## Deployment (Render)
+# Deployment
 
-### Build Command
+Hosted using Render.
+
+## Build Command
 
 ```bash
-pip install -r requirements.txt && python scraper.py && python embeddings.py
+pip install -r requirements.txt
 ```
 
-### Start Command
+## Start Command
 
 ```bash
 uvicorn app:app --host 0.0.0.0 --port 10000
 ```
 
-### Environment Variables
-
-Add:
+## Environment Variable
 
 ```env
 GROQ_API_KEY
@@ -407,101 +390,59 @@ GROQ_API_KEY
 
 ---
 
-## Example Test Cases
+# Example Scenarios
 
-### Vague Query
+Supported examples:
 
-Request:
-
-```json
-{
-  "messages": [
-    {
-      "role": "user",
-      "content": "Need assessment"
-    }
-  ]
-}
-```
-
-Expected behavior:
-- asks clarification
-- returns empty recommendations
+- "Need assessment"
+- "Hiring a senior Java engineer"
+- "Compare OPQ and MQ"
+- "Need leadership assessment for CXOs"
+- "Recommend customer service assessments"
+- "Hiring finance graduates"
 
 ---
 
-### Specific Hiring Request
-
-Request:
-
-```json
-{
-  "messages": [
-    {
-      "role": "user",
-      "content": "Hiring a Java developer with stakeholder communication skills"
-    }
-  ]
-}
-```
-
-Expected behavior:
-- recommends relevant SHL assessments
-
----
-
-### Comparison Query
-
-Request:
-
-```json
-{
-  "messages": [
-    {
-      "role": "user",
-      "content": "Compare OPQ and MQ"
-    }
-  ]
-}
-```
-
-Expected behavior:
-- grounded comparison
-- no hallucinated recommendations
-
----
-
-## Assignment Requirements Covered
+# Assignment Requirements Covered
 
 Implemented:
 
+- conversational recommendation API
 - SHL-only recommendations
-- Full conversation history support
-- Stateless API architecture
-- Clarification for vague queries
-- Recommendation generation
-- Assessment comparison
-- Requirement refinement
-- Off-topic refusal
-- Prompt injection resistance
-- Health endpoint
-- Exact response schema compliance
+- stateless conversation handling
+- clarification for vague queries
+- structured API responses
+- comparison handling
+- prompt injection protection
+- off-topic refusal
+- deployment-ready public endpoint
+- health endpoint
 
 ---
 
-## Future Improvements
+# Future Improvements
 
 Potential enhancements:
 
-- Better recommendation ranking
-- More accurate assessment comparison
-- Retrieval filtering improvements
-- Response caching
-- Evaluation benchmark automation
-- Faster inference optimization
+- stronger ranking logic
+- richer role-specific recommendation rules
+- language-aware recommendation refinement
+- exact evaluator scenario tuning
+- caching for lower latency
+- smarter catalog filtering
 
 ---
 
-## Author
+# Deployment URL
+
+Example:
+
+```text
+https://shl-ai-asessment-recommender.onrender.com
+```
+
+---
+
+# Author
 
 Developed for the SHL AI Intern Take-Home Assignment.
