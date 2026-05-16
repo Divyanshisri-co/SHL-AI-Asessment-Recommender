@@ -3,7 +3,6 @@ import json
 import faiss
 import numpy as np
 from dotenv import load_dotenv
-from sentence_transformers import SentenceTransformer
 from groq import Groq
 from prompts import SYSTEM_PROMPT
 
@@ -14,8 +13,6 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 INDEX_PATH = "data/shl_index.faiss"
 METADATA_PATH = "data/metadata.json"
-
-EMBED_MODEL = "all-MiniLM-L6-v2"
 
 OFF_TOPIC_KEYWORDS = [
     "weather",
@@ -42,7 +39,6 @@ class SHLRecommender:
             raise ValueError("Missing GROQ_API_KEY in .env")
 
         self.client = Groq(api_key=GROQ_API_KEY)
-        self.embedder = SentenceTransformer(EMBED_MODEL)
         self.index = faiss.read_index(INDEX_PATH)
 
         with open(METADATA_PATH, "r", encoding="utf-8") as f:
@@ -73,20 +69,28 @@ class SHLRecommender:
         return any(v in t for v in vague_inputs)
 
     def retrieve(self, query, top_k=10):
-        query_embedding = self.embedder.encode(
-            [query],
-            convert_to_numpy=True
-        ).astype("float32")
-
-        distances, indices = self.index.search(query_embedding, top_k)
-
-        results = []
-
-        for idx in indices[0]:
-            if idx < len(self.metadata):
-                results.append(self.metadata[idx])
-
-        return results
+        query_lower = query.lower()
+        scored = []
+    
+        for item in self.metadata:
+            score = 0
+    
+            searchable = (
+                item.get("name", "") + " " +
+                item.get("description", "") + " " +
+                " ".join(item.get("skills", []))
+            ).lower()
+    
+            for word in query_lower.split():
+                if word in searchable:
+                    score += 1
+    
+            if score > 0:
+                scored.append((score, item))
+    
+        scored.sort(key=lambda x: x[0], reverse=True)
+    
+        return [item for _, item in scored[:top_k]]
 
     def build_context(self, retrieved):
         context = []
